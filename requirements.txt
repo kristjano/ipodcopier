@@ -1,2 +1,2 @@
-stagger
+stagger>=1.0.0
 

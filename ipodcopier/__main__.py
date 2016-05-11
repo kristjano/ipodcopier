@@ -2,7 +2,7 @@ import argparse
 import os
 import os.path
 
-import stagger
+import ipodcopier.musiccopier
 
 def _parse_arguments():
     argparser = argparse.ArgumentParser(
@@ -17,6 +17,7 @@ def _parse_arguments():
 def main():
     args = _parse_arguments()
 
+    ipodcopier.musiccopier.copy_music(args.source, args.target)
+
 if __name__ == '__main__':
     main()
-
