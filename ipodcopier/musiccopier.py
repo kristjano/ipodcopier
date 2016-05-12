@@ -1,7 +1,36 @@
 import os.path
 import shutil
+import re
 
 import stagger
+
+def _sanitize_filename(filename):
+    '''
+    Removes characters, that are illegal in path, from string.
+    '''
+    sanitize = re.compile(r'[^-_. \w&()]')
+    return sanitize.sub('_', filename)
+
+def _organize_info(file_path):
+    '''
+    Analizes and organizes the ID3 data from file.
+    '''
+    old_filename, _ = os.path.splitext(os.path.basename(file_path))
+    file_info = get_file_info(file_path)
+    if file_info and file_info['artist']:
+        artist = _sanitize_filename(file_info['artist'])
+    else:
+        artist = 'Unknown artist'
+    if file_info and file_info['album']:
+        album = _sanitize_filename(file_info['album'])
+    else:
+        album = 'Unknown album'
+    if file_info and file_info['title']:
+        title = _sanitize_filename(file_info['title'])
+    else:
+        title = old_filename
+    track = file_info['track'] if file_info and file_info['track'] else 0
+    return (artist, album, title, track)
 
 def get_file_info(file_path):
     '''
@@ -27,13 +56,10 @@ def copy_music_file(file_path, target):
     '''
     Analizes, organizes and copies single music file from path to target.
     '''
-    old_filename, extension = os.path.splitext(os.path.basename(file_path))
-    file_info = get_file_info(file_path)
-    artist = file_info['artist'] if file_info and file_info['artist'] else 'Unknown artist'
-    album = file_info['album'] if file_info and file_info['album'] else 'Unknown album'
-    track = file_info['track'] if file_info and file_info['track'] else 0
-    title = file_info['title'] if file_info and file_info['title'] else old_filename
-    os.makedirs(os.path.join(target, artist, album), exist_ok=True)
+    artist, album, title, track = _organize_info(file_path)
+    _, extension = os.path.splitext(os.path.basename(file_path))
+    new_dir = os.path.join(target, artist, album)
+    os.makedirs(new_dir, exist_ok=True)
     if track:
         filename = '{track} - {title}{extension}'.format(
                         track=str(track).zfill(2),
@@ -41,8 +67,12 @@ def copy_music_file(file_path, target):
     else:
         filename = '{title}{extension}'.format(
                         title=title, extension=extension)
-    new_path = os.path.join(target, artist, album, filename)
-    shutil.copy(file_path, new_path)
+    new_path = os.path.join(new_dir, filename)
+    if not os.path.exists(new_path):
+        return shutil.copy(file_path, new_path)
+    else:
+        # log: file already exists, skipping
+        pass
 
 def copy_music(source, target):
     '''
