@@ -1,19 +1,13 @@
-from .context import ipodcopier
-from ipodcopier import musiccopier
-
 import tempfile
 import stagger
 
-def _test_get_file_info(**kwargs):
-    expected = {}
-    if kwargs:
-        expected['artist'] = kwargs['artist']
-        expected['album'] = kwargs['album']
-        expected['track'] = kwargs['track']
-        expected['title'] = kwargs['title']
+from .context import ipodcopier
+from ipodcopier import musiccopier
+
+def _test_get_file_info(**expected):
     with tempfile.TemporaryFile() as f:
         # Use dummy file
-        if kwargs:
+        if expected:
             stagger.util.set_frames(f, expected)
         obtained = musiccopier.get_file_info(f)
     assert obtained == expected, (obtained, expected)
