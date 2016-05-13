@@ -10,7 +10,9 @@ by the title.
 To install the packet:
 
     python3 setup.py install
-    # and run it
+    
+and run it
+    
     ipodcopier SOURCE TARGET
 
 Or run it once:
